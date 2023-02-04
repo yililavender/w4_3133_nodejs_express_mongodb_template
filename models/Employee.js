@@ -2,46 +2,89 @@ const mongoose = require('mongoose');
 
 const EmployeeSchema = new mongoose.Schema({
   firstname: {
-    type: String
+    type: String,
+    required:[true, "first name is required"],
+    trim:true,
+    lowercase:true
+
   },
   lastname: {
-    type: String
+    type: String,
+    required:true,
+    trim:true,
+    lowercase:true
   },
   email: {
-    type: String
+    type: String,
+    required:true,
+    trim:true,
+    lowercase:true
   },
   gender: {
-    type: String
+    type: String,
+    required:true,
+    trim:true,
+    lowercase:true
   },
   city:{
-    type: String
+    type: String,
+    required:true,
+    trim:true,
+    lowercase:true
   },
   designation: {
-    type: String
+    type: String,
+    required:true,
   },
   salary: {
-    type: Number
+    type: Number,
+    required:true,
+    validate(value){
+      if(salary < 0.0){
+        throw new Error("negative salary is not allowed!")
+      }
+    }
   },
   created: { 
-    type: Date
+    type: Date,
+    default: Date.now
   },
   updatedat: { 
-    type: Date
+    type: Date,
+    default: Date.now
   },
 });
 
 //Declare Virtual Fields
-
+EmployeeSchema.virtual("fullname")
+.get(function(){
+  return `${this.firstname} ${this.lastname}`
+})
 
 //Custom Schema Methods
 //1. Instance Method Declaration
 
+EmployeeSchema.methods.getFullName = function(){
+  return `${this.firstname} ${this.lastname}`
+}
 
+EmployeeSchema.methods.getFormattedSalary = function(){
+  return `$${this.salary}`
+}
 //2. Static method declararion
+EmployeeSchema.statistics.getEmployeeById = function(eid){
+  return this.find({_id: eid}).select("firstname lastname salary");
+}
 
 
 //Writing Query Helpers
+EmployeeSchema.query.sortByFirstName = function(flag){ //flag 1 or -1
+  return this.sort({'firstname': flag});
+}
 
+EmployeeSchema.query.byFirstName = function(name){
+  return this.where({'firstname': name});
+}
 
 
 EmployeeSchema.pre('save', (next) => {

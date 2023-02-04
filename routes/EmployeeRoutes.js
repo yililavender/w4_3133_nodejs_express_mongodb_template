@@ -5,7 +5,7 @@ const app = express();
 //Read ALL
 //http://localhost:8081/employees
 app.get('/employees', async (req, res) => {
-  const employees = await employeeModel.find({});
+  // const employees = await employeeModel.find({});
   //Sorting
   //use "asc", "desc", "ascending", "descending", 1, or -1
   //const employees = await employeeModel.find({}).sort({'firstname': -1});
@@ -13,8 +13,10 @@ app.get('/employees', async (req, res) => {
   //Select Specific Column
   //const employees = await employeeModel.find({}).select("firstname lastname salary").sort({'salary' : 'desc'});  
   
+  //Using Query Helper
+  const employees = await employeeModel.find({}).sortByFirstName(1)
   try {
-    console.log(employees[0].surname)
+    console.log(employees[0].fullname)
     res.status(200).send(employees);
   } catch (err) {
     res.status(500).send(err);
@@ -26,9 +28,12 @@ app.get('/employees', async (req, res) => {
 app.get('/employee', async (req, res) => {
   //const employees = await employeeModel.find({_id: req.query.id});
   //const employees = await employeeModel.findById(req.query.id);
-  const employees = await employeeModel.find({_id: req.query.id}).select("firstname lastname salary");
+  // const employees = await employeeModel.find({_id: req.query.id}).select("firstname lastname salary");
+  const employees = await employeeModel.getEmployeeById(req.query.id);
 
   try {
+    console.log(employees[0].getFullName())
+    console.log(employees[0].getFormattedSalary())
     res.send(employees);
   } catch (err) {
     res.status(500).send(err);
@@ -52,6 +57,7 @@ app.get('/employees/firstname/:name', async (req, res) => {
   
   //Using Query Helper
   //const employees = await employeeModel.findOne().byFirstName(name)
+ 
   
   try {
     if(employees.length != 0){
